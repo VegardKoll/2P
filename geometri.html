@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Volum og overflate – 2P</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1F4E5A; --ink2:#3d6470; --bg:#F5F8F6; --card:#fff; --line:#d5e2dc;
+  --grass:#5E9C44; --grass-d:#3f7a2b; --husk:#FBF1C7; --husk-b:#E2C65A;
+  --red:#C0392B; --blue:#2E6DA4; --purple:#7B3FA0;
+  --pairY:#E9D78A; --pairR:#E3A08C; --pairB:#AFC3D6; --fill:#EEF6EF; --g:#BFE0C6;
+  --ok:#2f7d32; --okbg:#e6f4e6; --bad:#a43a2c; --badbg:#fbe9e6;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Atkinson Hyperlegible",Verdana,Arial,sans-serif;color:var(--ink);background:var(--bg);font-size:17px;line-height:1.5}
+header{background:var(--ink);color:#fff;padding:18px 24px 0}
+header h1{margin:0;font-size:1.6rem}
+header p{margin:4px 0 14px;opacity:.85}
+nav{display:flex;flex-wrap:wrap;gap:4px}
+nav button{font:inherit;font-size:.92rem;border:0;background:rgba(255,255,255,.12);color:#fff;padding:8px 12px;border-radius:8px 8px 0 0;cursor:pointer}
+nav button[aria-selected=true]{background:var(--bg);color:var(--ink);font-weight:700}
+nav button .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:transparent;margin-left:6px;vertical-align:middle}
+nav button.done .dot{background:#9fd68a}
+.wrap{display:grid;grid-template-columns:1fr 250px;gap:20px;max-width:1150px;margin:0 auto;padding:20px}
+@media (max-width:860px){.wrap{grid-template-columns:1fr}aside{order:-1}}
+aside{display:flex;flex-direction:column;gap:14px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.box h3{margin:0 0 6px;font-size:1rem}
+.bar{height:12px;background:#e3ece7;border-radius:6px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--grass);transition:width .4s}
+section{display:none}
+section.active{display:block}
+h2{margin:0 0 10px;font-size:1.4rem}
+h3.sub{margin:22px 0 8px;font-size:1.12rem}
+.husk{background:var(--husk);border-left:6px solid var(--husk-b);border-radius:8px;padding:12px 16px;margin:12px 0}
+.husk b:first-child{display:block;margin-bottom:2px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0}
+.fig{display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+.fig svg{max-width:100%;height:auto}
+.controls{display:grid;gap:8px;min-width:220px}
+.controls label{display:grid;grid-template-columns:110px 1fr 44px;align-items:center;gap:8px;font-size:.95rem}
+input[type=range]{accent-color:var(--grass);width:100%}
+.out{font-variant-numeric:tabular-nums;background:#f2f6f4;border-radius:8px;padding:10px 12px;margin-top:10px}
+.out div{margin:2px 0}
+.task{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
+.task>p{margin:0 0 8px}
+.task .tt{font-weight:700}
+.part{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0;padding-top:8px;border-top:1px dashed var(--line)}
+.part .q{flex:1 1 260px}
+.part input,.part select{font:inherit;width:120px;padding:5px 8px;border:2px solid #b9cdc4;border-radius:6px}
+.part select{width:auto}
+.part input:focus,.part select:focus,button:focus-visible{outline:3px solid #9fd68a;outline-offset:1px}
+.unit{min-width:34px}
+.btn{font:inherit;font-size:.92rem;border:0;border-radius:6px;padding:6px 12px;cursor:pointer;background:var(--ink);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid #b9cdc4}
+.btn.green{background:var(--grass-d)}
+.fb{flex-basis:100%;font-size:.93rem;border-radius:6px;padding:0}
+.fb.ok{background:var(--okbg);color:var(--ok);padding:6px 10px}
+.fb.bad{background:var(--badbg);color:var(--bad);padding:6px 10px}
+.fb.hint{background:#eef3f8;color:#2a4d6b;padding:6px 10px}
+.part.solved input,.part.solved select{border-color:var(--ok);background:var(--okbg)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.hl{font-weight:700}
+.next{margin:22px 0 4px;text-align:right}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Volum og overflate</h1>
+  <p>Matematikk 2P · Jobb deg gjennom fanene i rekkefølge. Bruk «Hint» når du står fast.</p>
+  <nav id="tabs" role="tablist"></nav>
+</header>
+
+<div class="wrap">
+<main>
+
+<!-- 1 BEGREPER -->
+<section id="s1" data-title="1 Begreper">
+  <h2>Ord du må kunne</h2>
+  <div class="husk"><b>Huskeregel</b>
+  Lengde måles i <b>cm</b>. Areal (flater) måles i <b>cm²</b>. Volum (plass inni) måles i <b>cm³</b>.<br>
+  Den lille 2-tallet betyr «to retninger» (lengde og bredde). Den lille 3-tallet betyr «tre retninger» (lengde, bredde og høyde).</div>
+  <div class="panel fig">
+    <svg viewBox="0 0 360 230" width="360" aria-label="Eske med grunnflate og høyde">
+      <polygon points="60,190 230,190 300,140 130,140" fill="var(--g)" stroke="var(--ink)" stroke-width="2"/>
+      <line x1="130" y1="140" x2="130" y2="30" stroke="var(--ink)" stroke-dasharray="5 4"/>
+      <polygon points="60,80 230,80 300,30 130,30" fill="none" stroke="var(--ink)" stroke-width="2"/>
+      <polygon points="230,190 300,140 300,30 230,80" fill="none" stroke="var(--ink)" stroke-width="2"/>
+      <rect x="60" y="80" width="170" height="110" fill="none" stroke="var(--ink)" stroke-width="2"/>
+      <text x="180" y="172" font-size="22" font-weight="700" fill="var(--ink)" text-anchor="middle">G</text>
+      <line x1="322" y1="140" x2="322" y2="36" stroke="var(--red)" stroke-width="3"/>
+      <polygon points="316,44 328,44 322,32" fill="var(--red)"/>
+      <text x="334" y="95" font-size="20" font-weight="700" fill="var(--red)">h</text>
+    </svg>
+    <div style="flex:1 1 220px">
+      <p><b>Grunnflate (G)</b> er flaten figuren står på.</p>
+      <p><b style="color:var(--red)">Høyde (h)</b> går rett opp fra grunnflaten.</p>
+      <p><b>Volum</b> er hvor mye det er plass til inni.</p>
+      <p><b>Overflate</b> er hvor mye papir du trenger for å dekke hele utsiden.</p>
+    </div>
+  </div>
+  <div data-tasks="s1"></div>
+</section>
+
+<!-- 2 ESKE -->
+<section id="s2" data-title="2 Eske">
+  <h2>Eske (rett prisme)</h2>
+  <div class="husk"><b>Huskeregel</b>Volum = grunnflate · høyde. Grunnflaten er bunnlaget, og høyden er hvor mange lag du har.</div>
+  <h3 class="sub">Bygg en mur av Minecraft-blokker</h3>
+  <div class="panel fig">
+    <svg id="mc" width="360" height="260" aria-label="Mur av blokker"></svg>
+    <div class="controls">
+      <label>Lengde <input type="range" id="mcL" min="1" max="6" value="4"><span id="mcLv"></span></label>
+      <label>Bredde <input type="range" id="mcB" min="1" max="5" value="2"><span id="mcBv"></span></label>
+      <label>Høyde (lag) <input type="range" id="mcH" min="1" max="5" value="3"><span id="mcHv"></span></label>
+      <div class="out" id="mcOut"></div>
+    </div>
+  </div>
+  <h3 class="sub">Brett ut esken</h3>
+  <p>Overflaten er alle sideflatene lagt sammen. Flatene kommer i par med samme farge.</p>
+  <div class="panel">
+    <div class="controls" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+      <label>Lengde <input type="range" id="nL" min="1" max="8" value="5"><span id="nLv"></span></label>
+      <label>Bredde <input type="range" id="nB" min="1" max="6" value="3"><span id="nBv"></span></label>
+      <label>Høyde <input type="range" id="nH" min="1" max="6" value="2"><span id="nHv"></span></label>
+    </div>
+    <svg id="net" width="100%" style="max-width:560px;display:block;margin:auto" viewBox="0 0 560 300" aria-label="Utbrettet eske"></svg>
+    <div class="out" id="netOut"></div>
+  </div>
+  <div data-tasks="s2"></div>
+</section>
+
+<!-- 3 TREKANTPRISME -->
+<section id="s3" data-title="3 Trekantprisme">
+  <h2>Trekantet prisme</h2>
+  <p>Et trekantet prisme har en trekant i hver ende og tre rektangler på sidene, som en Toblerone-eske eller et telt.</p>
+  <div class="husk"><b>Pass på: to ulike høyder!</b>
+  Høyden <i>i trekanten</i> bruker du bare til å finne arealet av trekanten. Avstanden mellom de to trekantene kaller vi <b>lengden</b> på prismet.</div>
+  <div class="panel">
+    <div class="fig">
+      <svg id="tp" width="300" height="230" aria-label="Trekantet prisme"></svg>
+      <div class="controls">
+        <label>Katet (bunn) <input type="range" id="tA" min="2" max="8" value="4"><span id="tAv"></span></label>
+        <label>Katet (opp) <input type="range" id="tB" min="2" max="8" value="5"><span id="tBv"></span></label>
+        <label>Lengde <input type="range" id="tL" min="2" max="12" value="5"><span id="tLv"></span></label>
+      </div>
+    </div>
+    <svg id="tpStrip" width="100%" style="max-width:560px;display:block;margin:auto" viewBox="0 0 560 150" aria-label="De tre sideflatene"></svg>
+    <div class="row">
+      <button class="btn" data-step="1">Steg 1: Trekanten</button>
+      <button class="btn" data-step="2">Steg 2: Volum</button>
+      <button class="btn" data-step="3">Steg 3: Overflate</button>
+    </div>
+    <div class="out" id="tpOut"><div>Trykk på stegene for å se utregningen.</div></div>
+  </div>
+  <div class="husk"><b>Snarvei for overflaten</b>De tre rektanglene til sammen = omkretsen av trekanten · lengden. Så legger du til de to trekantene.</div>
+  <div data-tasks="s3"></div>
+</section>
+
+<!-- 4 SYLINDER -->
+<section id="s4" data-title="4 Sylinder">
+  <h2>Sylinder</h2>
+  <div class="husk"><b>Huskeregel</b>Grunnflaten er en sirkel: G = π · r · r. Volum = G · h.<br>
+  r² betyr r · r, <b>ikke</b> 2 · r.</div>
+  <div class="panel">
+    <div class="controls" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+      <label>Radius r <input type="range" id="cR" min="1" max="8" value="3"><span id="cRv"></span></label>
+      <label>Høyde h <input type="range" id="cH" min="2" max="15" value="12"><span id="cHv"></span></label>
+    </div>
+    <svg id="cyl" width="100%" style="max-width:600px;display:block;margin:auto" viewBox="0 0 580 300" aria-label="Sylinder og utbrettet etikett"></svg>
+    <div class="out" id="cylOut"></div>
+  </div>
+  <div data-tasks="s4"></div>
+</section>
+
+<!-- 5 PYRAMIDE OG KJEGLE -->
+<section id="s5" data-title="5 Pyramide og kjegle">
+  <h2>Pyramide og kjegle</h2>
+  <div class="husk"><b>Huskeregel</b>En spiss figur har plass til en tredjedel av den «rette» figuren med samme grunnflate og høyde. Derfor deler vi på 3:<br>
+  V = G · h / 3</div>
+  <h3 class="sub">Hvor mange pyramider fyller prismet?</h3>
+  <div class="panel fig">
+    <svg id="pour" width="420" height="250" aria-label="Prisme som fylles med vann fra pyramide"></svg>
+    <div class="controls">
+      <button class="btn green" id="pourBtn">Hell en pyramide med vann over</button>
+      <button class="btn ghost" id="pourReset">Tøm prismet</button>
+      <div class="out" id="pourOut"></div>
+    </div>
+  </div>
+  <h3 class="sub">Kjeglen: h eller s?</h3>
+  <div class="panel fig">
+    <svg id="cone" viewBox="0 0 300 240" width="300" aria-label="Kjegle"></svg>
+    <div class="controls">
+      <button class="btn" data-cone="h" style="background:var(--red)">Vis h (høyden)</button>
+      <button class="btn" data-cone="s" style="background:var(--purple)">Vis s (sidekanten)</button>
+      <button class="btn" data-cone="r" style="background:var(--blue)">Vis r (radius)</button>
+      <div class="out" id="coneOut">Trykk på en knapp.</div>
+    </div>
+  </div>
+  <div data-tasks="s5"></div>
+</section>
+
+<!-- 6 KULE -->
+<section id="s6" data-title="6 Kule">
+  <h2>Kule</h2>
+  <div class="husk"><b>Huskeregel</b>V = 4 · π · r³ / 3 og A = 4 · π · r²<br>r³ betyr r · r · r.</div>
+  <div class="panel fig">
+    <svg id="sph" viewBox="0 0 240 240" width="240" aria-label="Kule"></svg>
+    <div class="controls" style="flex:1 1 260px">
+      <label>Radius r <input type="range" id="sR" min="1" max="10" value="10"><span id="sRv"></span></label>
+      <div class="out" id="sphOut"></div>
+    </div>
+  </div>
+  <div data-tasks="s6"></div>
+</section>
+
+<!-- 7 ENHETER -->
+<section id="s7" data-title="7 Enheter">
+  <h2>Enheter for volum</h2>
+  <div class="husk"><b>Huskeregel</b>1 cm³ = 1 mL &nbsp;·&nbsp; 1 dm³ = 1 L &nbsp;·&nbsp; 1 m³ = 1000 L<br>
+  Hvert steg på trappa er ganger eller delt på 1000.</div>
+  <div class="panel fig">
+    <svg viewBox="0 0 330 200" width="330" aria-label="Literkube">
+      <g id="lcube"></g>
+    </svg>
+    <div style="flex:1 1 220px">
+      <p><b>10 cm · 10 cm · 10 cm = 1000 cm³</b></p>
+      <p>Det er 1 dm³, og det er nøyaktig <b style="color:var(--red)">1 liter</b>. En melkekartong er omtrent så stor.</p>
+    </div>
+  </div>
+  <h3 class="sub">Omregner</h3>
+  <div class="panel">
+    <div class="row">
+      <input id="convV" type="text" value="2500" style="font:inherit;width:120px;padding:5px 8px;border:2px solid #b9cdc4;border-radius:6px" aria-label="Tall">
+      <select id="convU" style="font:inherit;padding:5px 8px;border:2px solid #b9cdc4;border-radius:6px" aria-label="Enhet">
+        <option value="1e6">m³</option><option value="1000">dm³ (L)</option><option value="100">dL</option><option value="1" selected>cm³ (mL)</option>
+      </select>
+    </div>
+    <div class="out" id="convOut"></div>
+  </div>
+  <div data-tasks="s7"></div>
+</section>
+
+<!-- 8 BAKLENGS -->
+<section id="s8" data-title="8 Regn baklengs">
+  <h2>Regn baklengs</h2>
+  <p>Noen ganger vet du volumet, men ikke høyden. Da regner du baklengs.</p>
+  <div class="husk"><b>Huskeregel</b>Eske og sylinder: h = V / G<br>Pyramide og kjegle: h = 3 · V / G (gang med 3 først, del på G etterpå)</div>
+  <div data-tasks="s8"></div>
+</section>
+
+</main>
+
+<aside>
+  <div class="box"><h3>Dagens mål</h3><p style="margin:0" id="goal"></p></div>
+  <div class="box"><h3>Fremdrift</h3><div class="bar"><span id="progBar"></span></div><p style="margin:6px 0 0;font-size:.93rem" id="progTxt"></p></div>
+  <div class="box"><h3>Tips</h3><p style="margin:0;font-size:.95rem" id="tip"></p></div>
+</aside>
+</div>
+
+<script>
+// ---------- helpers ----------
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const PI=Math.PI;
+function fmt(x,d=2){if(!isFinite(x))return '–';let s=(+x.toFixed(d)).toString();return s.replace('.',',');}
+function parseNum(s){s=(s||'').trim().replace(/\s/g,'').replace(',','.').replace(/[^0-9.\-]/g,'');return s===''?NaN:parseFloat(s);}
+function P(pts){return pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}
+function poly(pts,fill,stroke='var(--ink)',sw=2,extra=''){return `<polygon points="${P(pts)}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round" ${extra}/>`}
+function line(a,b,c='var(--ink)',sw=2,dash=''){return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${c}" stroke-width="${sw}" ${dash?`stroke-dasharray="${dash}"`:''}/>`}
+function txt(x,y,s,o={}){return `<text x="${x}" y="${y}" font-size="${o.size||14}" fill="${o.c||'var(--ink)'}" text-anchor="${o.a||'middle'}" ${o.b?'font-weight="700"':''} font-family="inherit">${s}</text>`}
+function bindRange(id,cb){const el=$('#'+id),v=$('#'+id+'v');const f=()=>{v.textContent=el.value;cb()};el.addEventListener('input',f);return f;}
+
+// ---------- sections meta ----------
+const META={
+ s1:{goal:'Forstå forskjellen på lengde, areal og volum, og vite hva G, h og r betyr.',tip:'Spør deg selv: Skal jeg fylle noe (volum) eller dekke noe (overflate)?'},
+ s2:{goal:'Regne ut volum og overflate av en eske.',tip:'Tegn esken brettet ut. Da ser du alle seks flatene.'},
+ s3:{goal:'Regne ut volum og overflate av et trekantet prisme.',tip:'Ikke bruk hypotenusen når du regner arealet av trekanten. Men husk den i overflaten!'},
+ s4:{goal:'Regne ut volum og overflate av en sylinder.',tip:'Står det diameter i oppgaven? Del på 2 for å finne radien først.'},
+ s5:{goal:'Forstå hvorfor vi deler på 3 for pyramide og kjegle.',tip:'Volum bruker h (rett ned i midten). Overflaten av en kjegle bruker s (langs siden).'},
+ s6:{goal:'Regne ut volum og overflate av en kule.',tip:'Regn ut r · r · r først, og gang med resten etterpå.'},
+ s7:{goal:'Gjøre om mellom cm³, dm³, m³, liter og mL.',tip:'Tenk på melkekartongen: 1000 cm³ er 1 liter.'},
+ s8:{goal:'Finne høyden når du vet volumet.',tip:'Spør: Hvilket tall ganget med G gir volumet?'}
+};
+
+// ---------- tasks ----------
+// part: {q, a (number|string), tol (relative), u (unit), h (hint), opts (for select)}
+const UNITS=['cm','cm²','cm³','m²','m³'];
+const TASKS={
+ s1:[
+  {t:'Oppgave 1',p:'Hvilken enhet passer best?',parts:[
+   {q:'a) Lengden på en blyant',a:'cm',opts:UNITS,h:'Du måler bare i én retning.'},
+   {q:'b) Hvor mye maling du trenger til en vegg',a:'m²',opts:UNITS,h:'Du dekker en flate, og en vegg er stor.'},
+   {q:'c) Hvor mye vann det er i et akvarium',a:'cm³',opts:UNITS,h:'Du fyller noe.'},
+   {q:'d) Hvor stort et gulvteppe er',a:'m²',opts:UNITS,h:'Et teppe dekker en flate.'},
+   {q:'e) Hvor mye sand det er i en sandkasse',a:'m³',opts:UNITS,h:'Du fyller noe stort.'}]},
+  {t:'Oppgave 2',p:'Handler det om volum eller overflate?',parts:[
+   {q:'a) Gavepapir rundt en eske',a:'overflate',opts:['volum','overflate'],h:'Papiret dekker utsiden.'},
+   {q:'b) Vann til å fylle et basseng',a:'volum',opts:['volum','overflate'],h:'Du fyller.'},
+   {q:'c) Maling til en boks',a:'overflate',opts:['volum','overflate'],h:'Malingen ligger på utsiden.'},
+   {q:'d) Brus i en brusboks',a:'volum',opts:['volum','overflate'],h:'Brusen er inni.'}]},
+  {t:'Oppgave 3',p:'Radius og diameter.',parts:[
+   {q:'a) Diameter 10 cm. Radius = ?',a:5,u:'cm',h:'Radius er halvparten av diameteren.'},
+   {q:'b) Radius 7 cm. Diameter = ?',a:14,u:'cm',h:'Diameter er to radier.'},
+   {q:'c) En pizza har diameter 30 cm. Radius = ?',a:15,u:'cm',h:'Del på 2.'}]}
+ ],
+ s2:[
+  {t:'Oppgave 4 – Minecraft-muren',p:'Sett glidebryterne til lengde 4, bredde 2 og høyde 3.',parts:[
+   {q:'a) Hvor mange blokker er det i bunnlaget?',a:8,u:'blokker',h:'Bunnlaget er 4 · 2.'},
+   {q:'b) Hvor mange blokker er det totalt?',a:24,u:'blokker',h:'Bunnlaget ganger antall lag.'}]},
+  {t:'Oppgave 5',p:'En eske er 10 cm lang, 5 cm bred og 4 cm høy.',parts:[
+   {q:'a) Arealet av bunnen G',a:50,u:'cm²',h:'G = lengde · bredde.'},
+   {q:'b) Volumet V = G · h',a:200,u:'cm³',h:'Gang G med høyden 4.'}]},
+  {t:'Oppgave 6 – Overflaten steg for steg',p:'En eske er 5 cm lang, 3 cm bred og 2 cm høy. Bruk den utbrettede esken over.',parts:[
+   {q:'a) Topp og bunn (gule) til sammen',a:30,u:'cm²',h:'5 · 3 = 15, og det er to av dem.'},
+   {q:'b) Forside og bakside (røde) til sammen',a:20,u:'cm²',h:'5 · 2 = 10, og det er to av dem.'},
+   {q:'c) De to endene (blå) til sammen',a:12,u:'cm²',h:'3 · 2 = 6, og det er to av dem.'},
+   {q:'d) Hele overflaten',a:62,u:'cm²',h:'Legg sammen a, b og c.'}]}
+ ],
+ s3:[
+  {t:'Oppgave 7',p:'Katetene er 3 cm og 4 cm, hypotenusen er 5 cm, og prismet er 10 cm langt.',parts:[
+   {q:'a) Arealet av trekanten G',a:6,u:'cm²',h:'3 · 4 / 2. Ikke bruk hypotenusen.'},
+   {q:'b) Volumet',a:60,u:'cm³',h:'G · lengden = 6 · 10.'},
+   {q:'c) Overflaten',a:132,u:'cm²',h:'To trekanter (2 · 6) + rektanglene 3 · 10, 4 · 10 og 5 · 10.'}]},
+  {t:'Oppgave 4.10 fra boka',p:'Katetene er 4 cm og 5 cm, hypotenusen er 6,4 cm, og prismet er 5 cm langt. Still inn glidebryterne og sjekk deg selv.',parts:[
+   {q:'a) Arealet av trekanten G',a:10,u:'cm²',h:'4 · 5 / 2.'},
+   {q:'b) Volumet',a:50,u:'cm³',h:'G · 5.'},
+   {q:'c) Overflaten',a:97,u:'cm²',h:'2 · 10 + (4 + 5 + 6,4) · 5.'}]}
+ ],
+ s4:[
+  {t:'Oppgave 8 – Brusboksen',p:'En brusboks har radius 3 cm og høyde 12 cm.',parts:[
+   {q:'a) Grunnflaten G = π · 3 · 3',a:9*PI,tol:.015,u:'cm²',h:'3 · 3 = 9. Gang med π (3,14).'},
+   {q:'b) Volumet',a:108*PI,tol:.015,u:'cm³',h:'G · 12.'},
+   {q:'c) Hvor mange dL er det? (1 dL = 100 cm³)',a:3.39,tol:.03,u:'dL',h:'Del volumet på 100.'}]},
+  {t:'Oppgave 9 – Finn feilen',p:'Emma skriver π · 3² = π · 6. Hva skulle det stått?',parts:[
+   {q:'Riktig utregning',a:'π · 9',opts:['π · 6','π · 9','2 · π · 3'],h:'3² betyr 3 · 3.'}]},
+  {t:'Oppgave 10 – Etiketten',p:'Samme brusboks: r = 3 cm og h = 12 cm.',parts:[
+   {q:'a) Lokk og bunn til sammen',a:18*PI,tol:.015,u:'cm²',h:'2 · π · 3 · 3.'},
+   {q:'b) Lengden på etiketten (omkretsen 2 · π · r)',a:6*PI,tol:.015,u:'cm',h:'2 · π · 3.'},
+   {q:'c) Arealet av etiketten',a:72*PI,tol:.015,u:'cm²',h:'Lengden fra b ganger høyden 12.'},
+   {q:'d) Hele overflaten',a:90*PI,tol:.015,u:'cm²',h:'a + c.'}]}
+ ],
+ s5:[
+  {t:'Oppgave 11',p:'Et prisme og en pyramide har samme grunnflate og høyde. Prismet har volum 90 cm³.',parts:[
+   {q:'a) Volumet av pyramiden',a:30,u:'cm³',h:'Pyramiden er en tredjedel av prismet.'},
+   {q:'b) Hvor mange pyramider fyller prismet?',a:3,u:'',h:'Prøv knappen over.'}]},
+  {t:'Oppgave 12',p:'En pyramide har kvadratisk grunnflate 6 cm · 6 cm og høyde 10 cm.',parts:[
+   {q:'a) G',a:36,u:'cm²',h:'6 · 6.'},
+   {q:'b) Volumet',a:120,u:'cm³',h:'36 · 10 / 3.'}]},
+  {t:'Oppgave 13 – Iskremvaffelen',p:'En kjegle har radius 3 cm og høyde 10 cm.',parts:[
+   {q:'Volumet',a:30*PI,tol:.015,u:'cm³',h:'π · 3 · 3 · 10 / 3.'}]},
+  {t:'Oppgave 14 – h eller s?',p:'En kjegle har r = 5 cm, h = 12 cm og s = 13 cm.',parts:[
+   {q:'a) Hvilket tall bruker du i volumet?',a:'12',opts:['12','13'],h:'Volum bruker høyden rett ned i midten.'},
+   {q:'b) Volumet: π · 5 · 5 · 12 / 3',a:100*PI,tol:.015,u:'cm³',h:'25 · 12 = 300. Del på 3, gang med π.'},
+   {q:'c) Overflaten: π · 5 · 5 + π · 5 · 13',a:90*PI,tol:.015,u:'cm²',h:'25π + 65π.'}]}
+ ],
+ s6:[
+  {t:'Oppgave 15 – Oppvarming',p:'Regn ut.',parts:[
+   {q:'a) 2³',a:8,u:'',h:'2 · 2 · 2'},{q:'b) 3³',a:27,u:'',h:'3 · 3 · 3'},
+   {q:'c) 5³',a:125,u:'',h:'5 · 5 · 5'},{q:'d) 10³',a:1000,u:'',h:'10 · 10 · 10'}]},
+  {t:'Oppgave 16 – Fotballen',p:'En ball har radius 10 cm.',parts:[
+   {q:'a) Volumet',a:4000*PI/3,tol:.015,u:'cm³',h:'4 · π · 1000 / 3.'},
+   {q:'b) Hvor mange liter?',a:4.19,tol:.03,u:'L',h:'Del cm³ på 1000.'},
+   {q:'c) Overflaten',a:400*PI,tol:.015,u:'cm²',h:'4 · π · 100.'}]}
+ ],
+ s7:[
+  {t:'Oppgave 17 – Melkekartongen',p:'En melkekartong er omtrent 7 cm · 7 cm · 20 cm.',parts:[
+   {q:'a) Volumet',a:980,u:'cm³',h:'7 · 7 · 20.'},
+   {q:'b) Omtrent hvor mange liter?',a:1,tol:.05,u:'L',h:'1000 cm³ = 1 L.'}]},
+  {t:'Oppgave 18',p:'Gjør om.',parts:[
+   {q:'a) 500 cm³ = ? mL',a:500,u:'mL',h:'1 cm³ = 1 mL.'},
+   {q:'b) 500 cm³ = ? dL',a:5,u:'dL',h:'1 dL = 100 mL.'},
+   {q:'c) 2 dm³ = ? L',a:2,u:'L',h:'1 dm³ = 1 L.'},
+   {q:'d) 2500 cm³ = ? L',a:2.5,u:'L',h:'Del på 1000.'},
+   {q:'e) 3 m³ = ? L',a:3000,u:'L',h:'1 m³ = 1000 L.'}]}
+ ],
+ s8:[
+  {t:'Oppgave 19',p:'En eske har volum 60 cm³ og grunnflate 12 cm².',parts:[
+   {q:'Hvor høy er esken?',a:5,u:'cm',h:'Hvilket tall ganger 12 gir 60?'}]},
+  {t:'Oppgave 20',p:'En pyramide har volum 40 cm³ og grunnflate 12 cm².',parts:[
+   {q:'Hvor høy er pyramiden?',a:10,u:'cm',h:'3 · 40 = 120. Del på 12.'}]},
+  {t:'Oppgave 21 (som 4.19 i boka)',p:'En pyramide har grunnflate 24 cm² og volum 0,048 dm³.',parts:[
+   {q:'a) Gjør om volumet til cm³',a:48,u:'cm³',h:'1 dm³ = 1000 cm³. Gang med 1000.'},
+   {q:'b) Høyden',a:6,u:'cm',h:'3 · 48 = 144. Del på 24.'}]}
+ ]
+};
+
+// ---------- render tasks ----------
+const PARTS={};let total=0;
+for(const [sid,list] of Object.entries(TASKS)){
+  const host=document.querySelector(`[data-tasks="${sid}"]`);
+  let html='<h3 class="sub">Oppgaver</h3>';
+  list.forEach((t,ti)=>{
+    html+=`<div class="task"><p><span class="tt">${t.t}</span><br>${t.p}</p>`;
+    t.parts.forEach((p,pi)=>{
+      total++;
+      const id=`${sid}_${ti}_${pi}`;
+      const field=p.opts?`<select id="${id}"><option value="">Velg</option>${p.opts.map(o=>`<option>${o}</option>`).join('')}</select>`
+                         :`<input id="${id}" inputmode="decimal" autocomplete="off" aria-label="${p.q}"><span class="unit">${p.u||''}</span>`;
+      html+=`<div class="part" data-sec="${sid}" data-id="${id}"><span class="q">${p.q}</span>${field}
+      <button class="btn" data-check="${id}">Sjekk</button><button class="btn ghost" data-hint="${id}">Hint</button><div class="fb" id="fb_${id}"></div></div>`;
+      PARTS[id]=p;
+    });
+    html+='</div>';
+  });
+  host.innerHTML=html;
+}
+// ---------- checking & progress ----------
+const solved=new Set();
+function check(id){
+  const p=PARTS[id],el=$('#'+id),fb=$('#fb_'+id),row=el.closest('.part');
+  let ok;
+  if(p.opts){ if(!el.value){fb.className='fb hint';fb.textContent='Velg et svar først.';return;} ok=el.value===String(p.a); }
+  else{
+    const v=parseNum(el.value);
+    if(isNaN(v)){fb.className='fb hint';fb.textContent='Skriv inn et tall først. Du kan bruke komma.';return;}
+    const tol=p.tol||0.001; ok=Math.abs(v-p.a)<=Math.max(tol*Math.abs(p.a),1e-9);
+  }
+  if(ok){fb.className='fb ok';fb.textContent=p.tol?`Riktig! Nøyaktig svar: ${fmt(p.a,2)} ${p.u||''}`:'Riktig!';row.classList.add('solved');solved.add(id);}
+  else{fb.className='fb bad';fb.textContent='Ikke helt. Prøv igjen, eller trykk på «Hint».';row.classList.remove('solved');solved.delete(id);}
+  updateProgress();
+}
+document.addEventListener('click',e=>{
+  const c=e.target.dataset.check,h=e.target.dataset.hint;
+  if(c)check(c);
+  if(h){const fb=$('#fb_'+h);fb.className='fb hint';fb.textContent='Hint: '+PARTS[h].h;}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('.part input'))check(e.target.id)});
+document.addEventListener('change',e=>{if(e.target.matches('.part select'))check(e.target.id)});
+function updateProgress(){
+  $('#progBar').style.width=(100*solved.size/total)+'%';
+  $('#progTxt').textContent=`${solved.size} av ${total} deloppgaver riktig`;
+  $$('section').forEach(sec=>{
+    const ids=Object.keys(PARTS).filter(k=>k.startsWith(sec.id+'_'));
+    const b=$(`#tabs button[data-s="${sec.id}"]`);
+    b.classList.toggle('done',ids.length>0&&ids.every(i=>solved.has(i)));
+  });
+}
+
+// ---------- tabs ----------
+const secs=$$('section');
+secs.forEach((sec,i)=>{
+  const b=document.createElement('button');b.setAttribute('role','tab');b.dataset.s=sec.id;
+  b.innerHTML=sec.dataset.title+'<span class="dot"></span>';b.onclick=()=>show(sec.id);$('#tabs').appendChild(b);
+  if(i<secs.length-1){const n=document.createElement('div');n.className='next';
+    n.innerHTML=`<button class="btn green">Neste: ${secs[i+1].dataset.title.replace(/^\d+ /,'')}</button>`;
+    n.firstChild.onclick=()=>{show(secs[i+1].id);window.scrollTo({top:0,behavior:'smooth'})};sec.appendChild(n);}
+});
+function show(id){
+  secs.forEach(s=>s.classList.toggle('active',s.id===id));
+  $$('#tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.s===id));
+  $('#goal').textContent=META[id].goal;$('#tip').textContent=META[id].tip;
+}
+show('s1');updateProgress();
+
+// ---------- Minecraft wall ----------
+function drawMC(){
+  const L=+$('#mcL').value,B=+$('#mcB').value,H=+$('#mcH').value,s=24,c=s*0.866;
+  const pr=(x,y,z)=>[(x-y)*c,(x+y)*s*0.5-z*s];
+  const cubes=[];for(let z=0;z<H;z++)for(let x=0;x<L;x++)for(let y=0;y<B;y++)cubes.push([x,y,z]);
+  cubes.sort((a,b)=>(a[0]+a[1])-(b[0]+b[1])||a[2]-b[2]);
+  let g='';
+  for(const [x,y,z] of cubes){
+    const top=z===H-1?'#6AA84F':'#A9773F';
+    g+=poly([pr(x,y,z+1),pr(x+1,y,z+1),pr(x+1,y+1,z+1),pr(x,y+1,z+1)],top,'#3b2a16',1.3);
+    g+=poly([pr(x+1,y,z),pr(x+1,y+1,z),pr(x+1,y+1,z+1),pr(x+1,y,z+1)],'#7A4E24','#3b2a16',1.3);
+    g+=poly([pr(x,y+1,z),pr(x+1,y+1,z),pr(x+1,y+1,z+1),pr(x,y+1,z+1)],'#8B5A2B','#3b2a16',1.3);
+  }
+  const xs=[pr(0,B,0)[0],pr(L,0,0)[0]],minY=pr(0,0,H)[1],maxY=pr(L,B,0)[1];
+  const svg=$('#mc');svg.setAttribute('viewBox',`${xs[0]-10} ${minY-10} ${xs[1]-xs[0]+20} ${maxY-minY+20}`);
+  svg.innerHTML=g;
+  $('#mcOut').innerHTML=`<div>Bunnlaget (G): ${L} · ${B} = <b>${L*B}</b> blokker</div><div>Antall lag (h): <b>${H}</b></div><div>Volum: ${L*B} · ${H} = <b>${L*B*H}</b> blokker</div>`;
+}
+['mcL','mcB','mcH'].forEach(id=>bindRange(id,drawMC)());
+
+// ---------- box net ----------
+function drawNet(){
+  const l=+$('#nL').value,b=+$('#nB').value,h=+$('#nH').value;
+  const u=Math.min(540/(2*b+2*l),280/(2*b+h)),ox=(560-u*(2*b+2*l))/2,oy=(300-u*(2*b+h))/2;
+  const R=(x,y,w,hh,f,lab)=>`<rect x="${ox+x*u}" y="${oy+y*u}" width="${w*u}" height="${hh*u}" fill="${f}" stroke="var(--ink)" stroke-width="1.5"/>`+txt(ox+(x+w/2)*u,oy+(y+hh/2)*u+5,lab,{size:Math.max(10,Math.min(14,u*0.45))});
+  let g=R(0,b,b,h,'var(--pairB)',b*h)+R(b,b,l,h,'var(--pairR)',l*h)+R(b+l,b,b,h,'var(--pairB)',b*h)+R(2*b+l,b,l,h,'var(--pairR)',l*h)
+       +R(b,0,l,b,'var(--pairY)','topp '+l*b)+R(b,b+h,l,b,'var(--pairY)','bunn '+l*b);
+  $('#net').innerHTML=g;
+  const A=2*l*b+2*l*h+2*b*h;
+  $('#netOut').innerHTML=`<div><span style="background:var(--pairY);padding:0 6px;border-radius:4px">Topp og bunn</span> 2 · ${l} · ${b} = ${2*l*b}</div>
+  <div><span style="background:var(--pairR);padding:0 6px;border-radius:4px">Forside og bakside</span> 2 · ${l} · ${h} = ${2*l*h}</div>
+  <div><span style="background:var(--pairB);padding:0 6px;border-radius:4px">Endene</span> 2 · ${b} · ${h} = ${2*b*h}</div>
+  <div>Overflate: <b>${A} cm²</b> &nbsp;·&nbsp; Volum: ${l} · ${b} · ${h} = <b>${l*b*h} cm³</b></div>`;
+}
+['nL','nB','nH'].forEach(id=>bindRange(id,drawNet)());
+
+// ---------- triangular prism ----------
+let tpStep=0;
+function drawTP(){
+  const a=+$('#tA').value,b=+$('#tB').value,L=+$('#tL').value,c=Math.sqrt(a*a+b*b),cs=fmt(c,1),cr=+c.toFixed(1);
+  const u=Math.min(18,150/Math.max(a,b)),dk=Math.min(10,130/L);
+  const x0=40,y0=200,dx=L*dk,dy=-L*dk*0.4;
+  const A=[x0,y0],B=[x0+a*u,y0],C=[x0,y0-b*u],A2=[A[0]+dx,A[1]+dy],B2=[B[0]+dx,B[1]+dy],C2=[C[0]+dx,C[1]+dy];
+  let g=poly([C,C2,B2,B],'var(--fill)');
+  g+=line(A,A2,'var(--ink)',1.5,'5 4')+line(A2,C2,'var(--ink)',1.5,'5 4')+line(A2,B2,'var(--ink)',1.5,'5 4');
+  g+=poly([A,B,C],'var(--g)')+`<rect x="${x0}" y="${y0-9}" width="9" height="9" fill="none" stroke="var(--ink)"/>`;
+  g+=txt((A[0]+B[0])/2,y0+18,a+' cm')+txt(x0-6,(A[1]+C[1])/2+5,b+' cm',{a:'end'})+txt((B[0]+C[0])/2+6,(B[1]+C[1])/2-6,cs+' cm',{a:'start',size:13,c:'var(--red)'});
+  g+=txt((B[0]+B2[0])/2+14,(B[1]+B2[1])/2+14,L+' cm',{a:'start'})+txt(x0+a*u/3,y0-b*u/3+5,'G',{b:1,size:15});
+  const svg=$('#tp');const maxX=Math.max(B2[0],C2[0])+60,minY=Math.min(C2[1],C[1])-10;
+  svg.setAttribute('viewBox',`0 ${minY} ${maxX} ${y0+30-minY}`);svg.innerHTML=g;
+  // strip
+  const k=Math.min(520/(a+b+c),110/L);let x=(560-k*(a+b+c))/2,s='';
+  [[a,'var(--pairR)',a+''],[b,'var(--pairB)',b+''],[c,'var(--pairY)',cs]].forEach(([w,f,lab])=>{
+    s+=`<rect x="${x}" y="15" width="${w*k}" height="${L*k}" fill="${f}" stroke="var(--ink)" stroke-width="1.5"/>`+txt(x+w*k/2,15+L*k/2+5,`${lab} · ${L} = ${fmt(w*L,1)}`,{size:12})+txt(x+w*k/2,15+L*k+16,lab+' cm',{size:12});x+=w*k;});
+  $('#tpStrip').setAttribute('viewBox',`0 0 560 ${L*k+40}`);$('#tpStrip').innerHTML=s;
+  const G=a*b/2,rects=(a+b+cr)*L;
+  const st=[
+   `<div><b>Steg 1:</b> Arealet av trekanten. Bruk de to katetene, ikke hypotenusen.<br>G = ${a} · ${b} / 2 = <b>${fmt(G)} cm²</b></div>`,
+   `<div><b>Steg 2:</b> Volumet = G · lengden<br>V = ${fmt(G)} · ${L} = <b>${fmt(G*L)} cm³</b></div>`,
+   `<div><b>Steg 3:</b> Overflaten = 2 trekanter + 3 rektangler<br>To trekanter: 2 · ${fmt(G)} = ${fmt(2*G)}<br>Rektangler: ${a} · ${L} + ${b} · ${L} + ${cs} · ${L} = ${fmt(rects)}<br>Overflate: ${fmt(2*G)} + ${fmt(rects)} = <b>${fmt(2*G+rects)} cm²</b></div>`];
+  if(tpStep)$('#tpOut').innerHTML=st.slice(0,tpStep).join('');
+}
+['tA','tB','tL'].forEach(id=>bindRange(id,drawTP)());
+$$('[data-step]').forEach(b=>b.onclick=()=>{tpStep=+b.dataset.step;drawTP();});
+
+// ---------- cylinder ----------
+function drawCyl(){
+  const r=+$('#cR').value,h=+$('#cH').value,O=2*PI*r;
+  const k=Math.min(520/(2*r+O+4),230/(h+2));
+  const rx=r*k,ry=rx*0.3,H=h*k,cx=20+rx,top=30;
+  let g=`<rect x="${cx-rx}" y="${top}" width="${2*rx}" height="${H}" fill="var(--pairB)"/>`+
+    `<ellipse cx="${cx}" cy="${top+H}" rx="${rx}" ry="${ry}" fill="var(--pairB)" stroke="var(--ink)" stroke-width="2"/>`+
+    `<rect x="${cx-rx}" y="${top}" width="${2*rx}" height="${H}" fill="var(--pairB)"/>`+
+    line([cx-rx,top],[cx-rx,top+H])+line([cx+rx,top],[cx+rx,top+H])+
+    `<ellipse cx="${cx}" cy="${top}" rx="${rx}" ry="${ry}" fill="var(--pairY)" stroke="var(--ink)" stroke-width="2"/>`+
+    line([cx,top],[cx+rx,top],'var(--red)',2.5)+txt(cx+rx/2,top-6,'r',{c:'var(--red)',b:1})+txt(cx-rx-6,top+H/2,'h',{a:'end',b:1});
+  const lx=cx+rx+40;
+  g+=`<rect x="${lx}" y="${top}" width="${O*k}" height="${H}" fill="var(--pairB)" stroke="var(--ink)" stroke-width="2"/>`+
+     txt(lx+O*k/2,top+H/2+5,'etiketten')+txt(lx+O*k/2,top+H+22,'lengde = 2 · π · r = '+fmt(O,1),{c:'var(--red)',b:1,size:13});
+  $('#cyl').setAttribute('viewBox',`0 0 ${Math.max(580,lx+O*k+10)} ${top+H+40}`);$('#cyl').innerHTML=g;
+  const G=PI*r*r;
+  $('#cylOut').innerHTML=`<div>Grunnflate: G = π · ${r} · ${r} = <b>${fmt(G)} cm²</b></div>
+  <div>Volum: V = ${fmt(G)} · ${h} = <b>${fmt(G*h)} cm³</b> (${fmt(G*h/1000,2)} L)</div>
+  <div>Lokk og bunn: 2 · ${fmt(G)} = ${fmt(2*G)} cm²</div>
+  <div>Etiketten: ${fmt(O)} · ${h} = ${fmt(O*h)} cm²</div>
+  <div>Overflate: <b>${fmt(2*G+O*h)} cm²</b></div>`;
+}
+['cR','cH'].forEach(id=>bindRange(id,drawCyl)());
+
+// ---------- pour pyramid into prism ----------
+let pours=0;
+function drawPour(){
+  const fx=30,fy=210,w=120,H=150,dx=50,dy=-30;
+  const lvl=Math.min(pours,3)/3*H;
+  let g='';
+  if(lvl>0){g+=poly([[fx,fy],[fx+w,fy],[fx+w+dx,fy+dy],[fx+w+dx,fy+dy-lvl],[fx+w,fy-lvl],[fx,fy-lvl]],'#7fb7e0','none',0,'style="transition:all .4s"');
+            g+=poly([[fx,fy-lvl],[fx+w,fy-lvl],[fx+w+dx,fy+dy-lvl],[fx+dx,fy+dy-lvl]],'#a9d0ee','#5a93bd',1);}
+  g+=poly([[fx,fy-H],[fx+w,fy-H],[fx+w+dx,fy+dy-H],[fx+dx,fy+dy-H]],'none')+poly([[fx+w,fy],[fx+w+dx,fy+dy],[fx+w+dx,fy+dy-H],[fx+w,fy-H]],'none')+
+     `<rect x="${fx}" y="${fy-H}" width="${w}" height="${H}" fill="none" stroke="var(--ink)" stroke-width="2"/>`;
+  for(let i=1;i<3;i++)g+=line([fx-8,fy-H*i/3],[fx,fy-H*i/3],'var(--ink)',1.5)+txt(fx-11,fy-H*i/3+4,i+'/3',{a:'end',size:11});
+  const px=260,apex=[px+(w+dx)/2,fy+dy/2-H];
+  g+=poly([[px,fy],[px+w,fy],apex],'var(--fill)')+poly([[px+w,fy],[px+w+dx,fy+dy],apex],'#dcebdf');
+  g+=txt(fx+w/2+20,fy+30,'Prisme')+txt(px+w/2+20,fy+30,'Pyramide');
+  $('#pour').setAttribute('viewBox','0 40 440 210');$('#pour').innerHTML=g;
+  $('#pourOut').innerHTML=pours===0?'Prismet er tomt.':pours<3?`Du har helt over <b>${pours}</b> pyramide${pours>1?'r':''}. Prismet er ${pours}/3 fullt.`:
+   `<b>Fullt etter 3 pyramider!</b><br>Pyramiden har plass til en tredjedel av prismet. Derfor deler vi på 3.`;
+}
+$('#pourBtn').onclick=()=>{if(pours<3)pours++;drawPour();};$('#pourReset').onclick=()=>{pours=0;drawPour();};drawPour();
+
+// ---------- cone ----------
+function drawCone(m){
+  const cx=150,base=200,rx=90,ry=24,hh=170;
+  let g=`<ellipse cx="${cx}" cy="${base}" rx="${rx}" ry="${ry}" fill="#E4EEF2" stroke="var(--ink)" stroke-width="2"/>`+
+   poly([[cx-rx,base],[cx+rx,base],[cx,base-hh]],'var(--fill)')+
+   `<path d="M ${cx-rx} ${base} A ${rx} ${ry} 0 0 0 ${cx+rx} ${base}" fill="#E4EEF2" stroke="var(--ink)" stroke-width="2"/>`;
+  if(m==='h')g+=line([cx,base],[cx,base-hh],'var(--red)',4,'7 4')+`<rect x="${cx}" y="${base-11}" width="11" height="11" fill="none" stroke="var(--red)" stroke-width="1.5"/>`+txt(cx-10,base-hh/2,'h = 12',{a:'end',c:'var(--red)',b:1,size:16});
+  if(m==='s')g+=line([cx+rx,base],[cx,base-hh],'var(--purple)',5)+txt(cx+rx/2+14,base-hh/2,'s = 13',{a:'start',c:'var(--purple)',b:1,size:16});
+  if(m==='r')g+=line([cx,base],[cx+rx,base],'var(--blue)',4)+txt(cx+rx/2,base+18,'r = 5',{c:'var(--blue)',b:1,size:16});
+  $('#cone').innerHTML=g;
+  const T={h:'<b style="color:var(--red)">h</b> går rett ned i midten. Den bruker du når du regner <b>volum</b>.',
+           s:'<b style="color:var(--purple)">s</b> går langs den skrå siden. Den bruker du når du regner <b>overflate</b>.',
+           r:'<b style="color:var(--blue)">r</b> går fra midten av bunnen og ut til kanten.'};
+  if(m)$('#coneOut').innerHTML=T[m];
+}
+drawCone();$$('[data-cone]').forEach(b=>b.onclick=()=>drawCone(b.dataset.cone));
+
+// ---------- sphere ----------
+function drawSph(){
+  const r=+$('#sR').value,R=8+r*10;
+  $('#sph').innerHTML=`<circle cx="120" cy="120" r="${R}" fill="var(--fill)" stroke="var(--ink)" stroke-width="2"/>`+
+   `<ellipse cx="120" cy="120" rx="${R}" ry="${R*0.27}" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="5 4"/>`+
+   line([120,120],[120+R,120],'var(--red)',2.5)+`<circle cx="120" cy="120" r="3.5" fill="var(--ink)"/>`+txt(120+R/2,113,'r',{c:'var(--red)',b:1,size:16});
+  const r3=r*r*r,V=4*PI*r3/3,A=4*PI*r*r;
+  $('#sphOut').innerHTML=`<div>r³ = ${r} · ${r} · ${r} = <b>${r3}</b></div><div>Volum: 4 · π · ${r3} / 3 = <b>${fmt(V)} cm³</b> (${fmt(V/1000,2)} L)</div>
+  <div>r² = ${r} · ${r} = ${r*r}</div><div>Overflate: 4 · π · ${r*r} = <b>${fmt(A)} cm²</b></div>`;
+}
+bindRange('sR',drawSph)();
+
+// ---------- liter cube & converter ----------
+(function(){
+  const k=12,x=30,y=180;let g=poly([[x,y-10*k],[x+10*k,y-10*k],[x+10*k+6*k,y-10*k-4*k],[x+6*k,y-10*k-4*k]],'#C9E0F0')+
+   poly([[x+10*k,y],[x+16*k,y-4*k],[x+16*k,y-14*k],[x+10*k,y-10*k]],'#B7D3E6')+`<rect x="${x}" y="${y-10*k}" width="${10*k}" height="${10*k}" fill="#DCEBF5" stroke="var(--ink)" stroke-width="2"/>`;
+  for(let i=1;i<10;i++)g+=line([x+i*k,y],[x+i*k,y-10*k],'#8fb3cc',1)+line([x,y-i*k],[x+10*k,y-i*k],'#8fb3cc',1);
+  g+=txt(x+5*k,y+16,'10 cm')+txt(x+13*k+14,y-2*k+8,'10 cm',{a:'start'});
+  $('#lcube').innerHTML=g;
+})();
+function conv(){
+  const v=parseNum($('#convV').value),f=+$('#convU').value,cm3=v*f;
+  if(isNaN(v)){$('#convOut').textContent='Skriv inn et tall.';return;}
+  $('#convOut').innerHTML=`<div>${fmt(cm3/1e6,6)} m³</div><div>${fmt(cm3/1000,4)} dm³ = <b>${fmt(cm3/1000,4)} L</b></div><div>${fmt(cm3/100,3)} dL</div><div>${fmt(cm3,2)} cm³ = <b>${fmt(cm3,2)} mL</b></div>`;
+}
+$('#convV').addEventListener('input',conv);$('#convU').addEventListener('change',conv);conv();
+</script>
+</body>
+</html>
